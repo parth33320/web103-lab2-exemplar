@@ -1,20 +1,31 @@
 import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import './config/dotenv.js'
 import giftsRouter from './routes/gifts.js'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const app = express()
+
+app.use(express.json())
 
 app.use('/public', express.static('./public'))
 app.use('/scripts', express.static('./public/scripts'))
 
+// API routes
 app.use('/gifts', giftsRouter)
 
-app.get('/', (req, res) => {
-  res.status(200).send('<h1 style="text-align: center; margin-top: 50px;">UnEarthed API</h1>')
+// Serve Vite SPA static assets and fallback to index.html for client routing
+app.use(express.static(path.resolve(__dirname, './public')))
+
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, './public/index.html'))
 })
 
 const PORT = process.env.PORT || 3001
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server listening on http://localhost:${PORT}`)
+    console.log(`🚀 Server listening on http://localhost:${PORT}`)
 })
